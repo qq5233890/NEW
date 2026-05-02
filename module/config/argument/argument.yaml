@@ -315,7 +315,7 @@ Campaign:
   DefeatWithdraw: true
 StopCondition:
   OilLimit: 1000
-  CoinLimit: 0
+  CoinLimit: 500000
   RunCount: 0
   MapAchievement:
     value: non_stop
