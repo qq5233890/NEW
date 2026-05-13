@@ -1703,6 +1703,12 @@
       "slot_2": "使用于2号位喵",
       "slot_3": "使用于3号位喵",
       "slot_4": "使用于4号位喵"
+    },
+    "SkillAutoSwitch": {
+      "name": "きりかえのうりょく",
+      "help": "つぎのまだまなびおわってないのうりょくにじどうできりかえるにゃ",
+      "True": "ONにゃ",
+      "False": "OFFにゃ"
     }
   },
   "ControlExpOverflow": {
@@ -5278,6 +5284,9 @@
       "CommissionIncomeHeaderAvg": "平均/次喵",
       "CommissionIncomeTotalCommissions": "委托总次数: {value}喵",
       "CommissionIncomeRecentTitle": "最近委托记录喵"
+    },
+    "Tactical": {
+      "SkillAutoSwitch": "Gui.Tactical.SkillAutoSwitch"
     },
     "OpsiScheduling": {
       "UseSmartSchedulingOperationCoinsPreserve": "获取X个凭证喵",

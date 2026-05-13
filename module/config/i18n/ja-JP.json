@@ -1703,6 +1703,12 @@
       "slot_2": "2番目で使用",
       "slot_3": "3番目で使用",
       "slot_4": "4番目で使用"
+    },
+    "SkillAutoSwitch": {
+      "name": "自動スキル切替",
+      "help": "次の未学習スキルに自動的に切り替えて学習します",
+      "True": "オン",
+      "False": "オフ"
     }
   },
   "ControlExpOverflow": {
@@ -5278,6 +5284,9 @@
       "CommissionIncomeHeaderAvg": "Gui.Stat.CommissionIncomeHeaderAvg",
       "CommissionIncomeTotalCommissions": "Gui.Stat.CommissionIncomeTotalCommissions",
       "CommissionIncomeRecentTitle": "Gui.Stat.CommissionIncomeRecentTitle"
+    },
+    "Tactical": {
+      "SkillAutoSwitch": "Gui.Tactical.SkillAutoSwitch"
     },
     "OpsiScheduling": {
       "UseSmartSchedulingOperationCoinsPreserve": "Gui.OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve",

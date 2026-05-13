@@ -305,6 +305,72 @@ class RewardTacticalClass(Dock):
             logger.attr('Filtered', before - self.books.count)
             logger.attr('Books', str(self.books))
 
+    def _is_current_skill_max(self):
+        """
+        检测当前选中的技能是否已满级（基于教材选择界面的经验 OCR）。
+
+        Returns:
+            bool: 如果当前技能已满级返回 True
+        """
+        try:
+            current, _, total = SKILL_EXP.ocr(self.device.image)
+            if total > 0 and current >= total:
+                logger.info(f'Current skill is max level: {current}/{total}')
+                return True
+        except Exception as e:
+            logger.warning(f'Failed to check skill max level: {e}')
+        return False
+
+    def _try_switch_to_next_skill(self):
+        """
+        当前技能已满级时，尝试切换到同舰娘的下一个非满级技能。
+
+        进入时在 TACTICAL_CLASS_START，立即点击取消回到技能选择界面 (SKILL_CONFIRM)，
+        查找下一个未满级技能并确认后返回教材选择界面 (TACTICAL_CLASS_START)。
+
+        Returns:
+            bool: 是否成功切换到下一个技能
+
+        Pages:
+            in: TACTICAL_CLASS_START (点击取消后进入 SKILL_CONFIRM)
+            out: TACTICAL_CLASS_START (if success) or SKILL_CONFIRM (if no skill found)
+        """
+        logger.hr('Try switch to next skill', level=2)
+        # 取消当前教材选择，回到技能选择界面
+        self.device.click(TACTICAL_CLASS_CANCEL)
+        self.device.sleep((0.5, 1.0))
+
+        # 等待技能选择界面加载
+        for _ in range(5):
+            self.device.screenshot()
+            if self.appear(SKILL_CONFIRM, offset=(20, 20)):
+                break
+            self.device.sleep((0.3, 0.5))
+        else:
+            logger.warning('Failed to return to SKILL_CONFIRM after cancel')
+            return False
+
+        # 寻找下一个非满级技能
+        selected_skill = self.find_not_full_level_skill(skip_first_screenshot=True)
+        if selected_skill is None:
+            logger.info('No other non-max skill available for this ship')
+            return False
+
+        # 选中并确认新技能
+        logger.info('Switching to next non-max skill')
+        self._tactical_skill_select(selected_skill)
+        self.device.click(SKILL_CONFIRM)
+
+        # 等待教材选择界面加载
+        for _ in range(5):
+            self.device.screenshot()
+            if self.appear(TACTICAL_CLASS_START, offset=(30, 30)):
+                logger.info('Entered TACTICAL_CLASS_START after skill switch')
+                return True
+            self.device.sleep((0.3, 0.5))
+        logger.warning('Failed to enter TACTICAL_CLASS_START after skill switch')
+        return False
+
     def _tactical_books_choose(self):
         """
         Choose tactical book according to config.
@@ -346,6 +412,12 @@ class RewardTacticalClass(Dock):
             logger.info(f'_tactical_books_choose -> {TACTICAL_CLASS_START}')
             self.device.click(TACTICAL_CLASS_START)
         else:
+            # 无教材可选时，检测是否因为技能已满级（受 SkillAutoSwitch 配置控制）
+            if self.config.Tactical_SkillAutoSwitch and self._is_current_skill_max():
+                logger.info('No books because skill is max, try switch to next skill')
+                if self._try_switch_to_next_skill():
+                    logger.info('Switched to next skill, re-enter book choose')
+                    return self._tactical_books_choose()
             logger.info('Cancel tactical')
             logger.info(f'_tactical_books_choose -> {TACTICAL_CLASS_CANCEL}')
             self.device.click(TACTICAL_CLASS_CANCEL)

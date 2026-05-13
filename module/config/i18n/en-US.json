@@ -1703,6 +1703,12 @@
       "slot_2": "Used in position 2",
       "slot_3": "Used in position 3",
       "slot_4": "Used in position 4"
+    },
+    "SkillAutoSwitch": {
+      "name": "Auto Switch Skill",
+      "help": "Automatically switch to the next unlearned skill for training",
+      "True": "On",
+      "False": "Off"
     }
   },
   "ControlExpOverflow": {
@@ -5278,6 +5284,9 @@
       "CommissionIncomeHeaderAvg": "Avg/Run",
       "CommissionIncomeTotalCommissions": "Total commissions: {value}",
       "CommissionIncomeRecentTitle": "Recent Commissions"
+    },
+    "Tactical": {
+      "SkillAutoSwitch": "Gui.Tactical.SkillAutoSwitch"
     },
     "OpsiScheduling": {
       "UseSmartSchedulingOperationCoinsPreserve": "Gui.OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve",

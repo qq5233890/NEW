@@ -553,6 +553,10 @@ Tactical:
   RapidTrainingSlot:
     value: do_not_use
     option: [do_not_use, slot_1, slot_2, slot_3, slot_4]
+  SkillAutoSwitch:
+    type: checkbox
+    value: true
+    option: [true, false]
 ControlExpOverflow:
   Enable: true
   T4Allow: 100

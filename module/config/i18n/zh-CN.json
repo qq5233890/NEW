@@ -1703,6 +1703,12 @@
       "slot_2": "使用于2号位",
       "slot_3": "使用于3号位",
       "slot_4": "使用于4号位"
+    },
+    "SkillAutoSwitch": {
+      "name": "自动切换技能",
+      "help": "自动切换到下一个尚未学习的技能进行学习",
+      "True": "开启",
+      "False": "关闭"
     }
   },
   "ControlExpOverflow": {
@@ -5278,6 +5284,9 @@
       "CommissionIncomeHeaderAvg": "平均/次",
       "CommissionIncomeTotalCommissions": "委托总次数: {value}",
       "CommissionIncomeRecentTitle": "最近委托记录"
+    },
+    "Tactical": {
+      "SkillAutoSwitch": "Gui.Tactical.SkillAutoSwitch"
     },
     "OpsiScheduling": {
       "UseSmartSchedulingOperationCoinsPreserve": "Gui.OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve",

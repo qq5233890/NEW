@@ -1703,6 +1703,12 @@
       "slot_2": "使用於2號位",
       "slot_3": "使用於3號位",
       "slot_4": "使用於4號位"
+    },
+    "SkillAutoSwitch": {
+      "name": "自動切換技能",
+      "help": "自動切換到下一個尚未學習的技能進行學習",
+      "True": "開啟",
+      "False": "關閉"
     }
   },
   "ControlExpOverflow": {
@@ -5278,6 +5284,9 @@
       "CommissionIncomeHeaderAvg": "Gui.Stat.CommissionIncomeHeaderAvg",
       "CommissionIncomeTotalCommissions": "Gui.Stat.CommissionIncomeTotalCommissions",
       "CommissionIncomeRecentTitle": "Gui.Stat.CommissionIncomeRecentTitle"
+    },
+    "Tactical": {
+      "SkillAutoSwitch": "Gui.Tactical.SkillAutoSwitch"
     },
     "OpsiScheduling": {
       "UseSmartSchedulingOperationCoinsPreserve": "Gui.OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve",

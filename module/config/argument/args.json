@@ -9668,6 +9668,14 @@
           "slot_3",
           "slot_4"
         ]
+      },
+      "SkillAutoSwitch": {
+        "type": "checkbox",
+        "value": true,
+        "option": [
+          true,
+          false
+        ]
       }
     },
     "ControlExpOverflow": {
