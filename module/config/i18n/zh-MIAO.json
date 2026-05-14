@@ -1,4 +1,4 @@
-﻿{
+{
   "Menu": {
     "Alas": {
       "name": "智慧喵港区+ (｡>﹏<｡)",
@@ -3585,6 +3585,10 @@
       "name": "血量< X 使用维修箱 (｡•́︿•̀｡)",
       "help": "仅打开修船开关且打完深渊、要塞、月度Boss后尝试。0.0~1.0"
     },
+    "RepairPackThresholdHazard1": {
+      "name": "OpsiGeneral.RepairPackThresholdHazard1.name",
+      "help": "OpsiGeneral.RepairPackThresholdHazard1.help"
+    },
     "DoRandomMapEvent": {
       "name": "完成地图随机事件 (。・ω・。)",
       "help": "自律后重新扫描地图：买明石商店、用塞壬信息收集/探测装置、解锁双舰队机关喵。"
@@ -3904,6 +3908,10 @@
     "RecordNonCL1AP": {
       "name": "统计非侵蚀1来源体力 (。・ω・。)",
       "help": "开启则统计所有来源体力，关闭仅统计侵蚀1任务中体力，忽略其他任务或手动操作体力获取喵。"
+    },
+    "PreserveVirtualAsset": {
+      "name": "OpsiHazard1Leveling.PreserveVirtualAsset.name",
+      "help": "OpsiHazard1Leveling.PreserveVirtualAsset.help"
     }
   },
   "OpsiSirenBug": {
@@ -4044,6 +4052,10 @@
     "MeowStartEarlyEnable": {
       "name": "启用月末行动力自动清理 (｀・ω・´)",
       "help": "根据历史短猫耗时和当前行动力，自动判断是否提前短猫清月末过剩行动力。基准是下月重置时间，不是每日刷新喵。"
+    },
+    "VirtualAssetPreserve": {
+      "name": "OpsiScheduling.VirtualAssetPreserve.name",
+      "help": "OpsiScheduling.VirtualAssetPreserve.help"
     }
   },
   "IslandSeasonTask": {
@@ -4186,6 +4198,32 @@
     "RestartIntervalHours": {
       "name": "重启间隔（小时） (´-ω-`)zzz",
       "help": ""
+    }
+  },
+  "EmulatorManager": {
+    "_info": {
+      "name": "EmulatorManager._info.name",
+      "help": "EmulatorManager._info.help"
+    },
+    "RemoteSSHHost": {
+      "name": "EmulatorManager.RemoteSSHHost.name",
+      "help": "EmulatorManager.RemoteSSHHost.help"
+    },
+    "RemoteSSHPort": {
+      "name": "EmulatorManager.RemoteSSHPort.name",
+      "help": "EmulatorManager.RemoteSSHPort.help"
+    },
+    "RemoteSSHUser": {
+      "name": "EmulatorManager.RemoteSSHUser.name",
+      "help": "EmulatorManager.RemoteSSHUser.help"
+    },
+    "RemoteSSHPublicKey": {
+      "name": "EmulatorManager.RemoteSSHPublicKey.name",
+      "help": "EmulatorManager.RemoteSSHPublicKey.help"
+    },
+    "RemoteCommand": {
+      "name": "EmulatorManager.RemoteCommand.name",
+      "help": "EmulatorManager.RemoteCommand.help"
     }
   },
   "OpsiSimulatorParameters": {
