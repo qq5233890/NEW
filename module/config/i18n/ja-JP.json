@@ -4609,6 +4609,28 @@
     "Misc": {
       "Enabled": "Enabled",
       "Disabled": "Disabled"
+    },
+    "OOBE": {
+      "WelcomeTitle": "AzurPilotへようこそ",
+      "WelcomeDescription": "初期設定を完了しましょう。",
+      "WelcomeSelectLanguage": "言語を選択",
+      "ServerTitle": "サーバーを選択",
+      "ServerCN": "中国大陸版 (CN)",
+      "ServerEN": "グローバル版 (EN)",
+      "ServerJP": "日本版 (JP)",
+      "ServerTW": "台湾版 (TW)",
+      "EmulatorTitle": "エミュレータ設定",
+      "EmulatorSerial": "シリアル番号 / アドレス",
+      "EmulatorPackage": "パッケージ名",
+      "ReviewTitle": "確認して作成",
+      "ReviewConfigName": "設定名",
+      "ReviewLanguage": "言語",
+      "ReviewServer": "サーバー",
+      "ReviewSerial": "シリアル番号",
+      "ReviewPackage": "パッケージ名",
+      "ButtonNext": "次へ",
+      "ButtonBack": "戻る",
+      "ButtonCreate": "作成して完了"
     }
   }
 }

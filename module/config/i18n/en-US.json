@@ -4609,6 +4609,28 @@
     "Misc": {
       "Enabled": "Enabled",
       "Disabled": "Disabled"
+    },
+    "OOBE": {
+      "WelcomeTitle": "Welcome to AzurPilot",
+      "WelcomeDescription": "Let's set up your first instance.",
+      "WelcomeSelectLanguage": "Select your language",
+      "ServerTitle": "Select Server",
+      "ServerCN": "CN Server",
+      "ServerEN": "EN Server",
+      "ServerJP": "JP Server",
+      "ServerTW": "TW Server",
+      "EmulatorTitle": "Emulator Setup",
+      "EmulatorSerial": "Emulator Serial / Address",
+      "EmulatorPackage": "Package Name",
+      "ReviewTitle": "Review & Create",
+      "ReviewConfigName": "Config Name",
+      "ReviewLanguage": "Language",
+      "ReviewServer": "Server",
+      "ReviewSerial": "Serial",
+      "ReviewPackage": "Package",
+      "ButtonNext": "Next",
+      "ButtonBack": "Back",
+      "ButtonCreate": "Create & Finish"
     }
   }
 }

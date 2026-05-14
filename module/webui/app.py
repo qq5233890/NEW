@@ -69,6 +69,7 @@ from module.config.utils import (
     dict_to_kv,
     filepath_args,
     filepath_config,
+    is_oobe_needed,
     read_file,
     readable_time,
 )
@@ -4083,6 +4084,14 @@ class AlasGUI(Frame):
         )
 
         aside = get_localstorage("aside")
+
+        # OOBE 初次设置向导：无用户配置时引导完成基本设置
+        if is_oobe_needed():
+            from module.webui.oobe import OOBEWizard
+
+            OOBEWizard(self).start()
+            return
+
         self.show()
 
         # init config watcher

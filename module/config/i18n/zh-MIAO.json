@@ -4609,6 +4609,28 @@
     "Misc": {
       "Enabled": "已开启喵",
       "Disabled": "未开启喵"
+    },
+    "OOBE": {
+      "WelcomeTitle": "欢迎使用 ALAS 喵！(｡>﹏<｡)",
+      "WelcomeDescription": "指挥官，快来和雪风一起完成初次设置喵~ (ฅ´ω`ฅ)",
+      "WelcomeSelectLanguage": "选择哪种语言喵？(･ω･)ﾉ",
+      "ServerTitle": "选择要去的服务器喵 (=^･ω･^=)",
+      "ServerCN": "国服喵 (｀・ω・´)",
+      "ServerEN": "国际服 (EN) 喵",
+      "ServerJP": "日服 (JP) 喵",
+      "ServerTW": "台服 (TW) 喵",
+      "EmulatorTitle": "模拟器设置板板 (´-ω-`)",
+      "EmulatorSerial": "模拟器序列号 / 地址喵 (。・ω・。)",
+      "EmulatorPackage": "包名选择喵",
+      "ReviewTitle": "确认并创建喵！(๑•̀ㅂ•́)و✧",
+      "ReviewConfigName": "配置名称喵",
+      "ReviewLanguage": "语言喵",
+      "ReviewServer": "服务器喵",
+      "ReviewSerial": "序列号喵",
+      "ReviewPackage": "包名喵",
+      "ButtonNext": "下一步喵！",
+      "ButtonBack": "上一步喵",
+      "ButtonCreate": "创建并完成喵！(=｀ω´=)"
     }
   }
 }

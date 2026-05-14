@@ -4609,6 +4609,28 @@
     "Misc": {
       "Enabled": "已開啟",
       "Disabled": "未開啟"
+    },
+    "OOBE": {
+      "WelcomeTitle": "歡迎使用 AzurPilot",
+      "WelcomeDescription": "讓我們完成初次設定。",
+      "WelcomeSelectLanguage": "選擇語言",
+      "ServerTitle": "選擇伺服器",
+      "ServerCN": "國服",
+      "ServerEN": "國際服 (EN)",
+      "ServerJP": "日服 (JP)",
+      "ServerTW": "台服 (TW)",
+      "EmulatorTitle": "模擬器設定",
+      "EmulatorSerial": "模擬器序號 / 位址",
+      "EmulatorPackage": "包名",
+      "ReviewTitle": "確認並建立",
+      "ReviewConfigName": "設定名稱",
+      "ReviewLanguage": "語言",
+      "ReviewServer": "伺服器",
+      "ReviewSerial": "序號",
+      "ReviewPackage": "包名",
+      "ButtonNext": "下一步",
+      "ButtonBack": "上一步",
+      "ButtonCreate": "建立並完成"
     }
   }
 }
