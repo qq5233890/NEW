@@ -31,7 +31,7 @@ RUN printf 'Acquire::http::Proxy "%s";\nAcquire::https::Proxy "%s";\n' "$HTTP_PR
     && git config --global https.proxy "$HTTPS_PROXY" \
     && pip install --upgrade pip \
     && pip install Cython==0.29.37 \
-    && pip install av \
+    && pip install "av>=10,<14" \
     && pip install -r /tmp/requirements.txt \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \

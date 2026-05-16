@@ -93,6 +93,9 @@ class DashboardScopeManager:
         sanitized_name = cls.sanitize_group_name(group_name)
         return f"{sanitized_name}_group"
     
+    # 已注册的 scope ID 集合，用于检测冲突
+    _registered_ids: set = set()
+    
     @classmethod
     def change_prefix(cls, new_prefix: str) -> None:
         """
@@ -104,6 +107,28 @@ class DashboardScopeManager:
             new_prefix: 新的前缀字符串
         """
         cls.DASHBOARD_PREFIX = new_prefix
+    
+    @classmethod
+    def check_collision(cls, group_name: str) -> bool:
+        """
+        检测 scope ID 是否存在冲突（不同的 group_name 清洗后得到相同的 scope ID）
+        
+        Args:
+            group_name: 原始的 group 名称
+            
+        Returns:
+            True 表示存在冲突，False 表示无冲突
+        """
+        scope_id = cls.get_dashboard_scope_id(group_name)
+        if scope_id in cls._registered_ids:
+            return True
+        cls._registered_ids.add(scope_id)
+        return False
+    
+    @classmethod
+    def reset_registry(cls) -> None:
+        """重置已注册的 scope ID 集合（用于页面刷新时）"""
+        cls._registered_ids.clear()
 
 
 # 便捷函数，直接导入使用
