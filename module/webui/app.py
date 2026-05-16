@@ -119,6 +119,7 @@ from module.webui.widgets import (
     put_none,
     put_output,
 )
+from module.webui.dashboard_utils import get_dashboard_scope_id, get_group_scope_id
 from module.base.device_id import get_device_id
 
 patch_executor()
@@ -3049,15 +3050,15 @@ class AlasGUI(Frame):
                 f"""background-color:{deep_get(group, "Color").replace("^", "#")}"""
             )
             color = f'<div class="status-point" style={_color}>'
-            # 修复：使用完整的 scope 路径，避免重复创建
-            scope_id = f"dashboard_{group_name}"
+            # 使用集中管理的辅助函数生成 scope_id，确保命名一致性和安全性
+            scope_id = get_dashboard_scope_id(group_name)
             with use_scope(scope_id, clear=True):
                 (
                     put_row(
                         [
                             put_html(color),
                             put_scope(
-                                f"{group_name}_group",
+                                get_group_scope_id(group_name),
                                 [
                                     put_column(
                                         [
