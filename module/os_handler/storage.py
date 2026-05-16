@@ -1,3 +1,5 @@
+from enum import Enum
+
 from module.base.timer import Timer
 from module.base.utils import area_offset, crop, rgb2gray
 from module.combat.assets import GET_ITEMS_1, GET_ITEMS_2
@@ -9,6 +11,19 @@ from module.os.globe_zone import ZoneManager
 from module.os_handler.assets import *
 from module.storage.assets import BOX_USE
 from module.ui.scroll import Scroll
+
+
+class RepairResult(Enum):
+    """
+    维修操作的结果枚举。
+
+    SUCCESS: 舰船修复成功。
+    PACK_INSUFFICIENT: 维修箱数量不足，游戏弹出"道具不足"弹窗。
+    TIMEOUT: 超时或遇到未知弹窗，无法确认修复结果。
+    """
+    SUCCESS = 'success'
+    PACK_INSUFFICIENT = 'pack_insufficient'
+    TIMEOUT = 'timeout'
 
 SCROLL_STORAGE = Scroll(STORATE_SCROLL, color=(247, 211, 66))
 
@@ -212,7 +227,10 @@ class StorageHandler(GlobeOperation, ZoneManager):
             skip_first_screenshot:
 
         Returns:
-            bool: True if repaired successfully, False if repair pack insufficient.
+            RepairResult:
+                RepairResult.SUCCESS          — 舰船修复成功（或满血无需修复）。
+                RepairResult.PACK_INSUFFICIENT — 维修箱耗尽，游戏弹出"道具不足"弹窗。
+                RepairResult.TIMEOUT          — 超时或遇到未知弹窗，无法确认修复结果。
 
         Pages:
             in: STORAGE_FLEET_CHOOSE
@@ -233,20 +251,20 @@ class StorageHandler(GlobeOperation, ZoneManager):
             if self.appear(STORAGE_REPAIR_CONFIRM, offset=(20, 20)) and \
                     not self.image_color_count(image, color=(93, 148, 203), count=300):
                 logger.info('Ship Fixed')
-                return True
+                return RepairResult.SUCCESS
             # End - ship already at full HP
             if self.handle_popup_cancel('STORAGE_REPAIR_FULL_CANCEL'):
                 logger.info('No need to fix this ship')
-                return True
+                return RepairResult.SUCCESS
             # 处理"道具不足"弹窗：维修箱数量不足时游戏弹出此提示，需点击取消退出
             # 截图显示弹窗标题为"信息 INFORMATION"，内容为"道具不足"，底部有取消按钮
             if self.appear_then_click(POPUP_CANCEL, offset=(20, 20), interval=2):
                 logger.warning('Repair pack insufficient (道具不足), skip this ship')
-                return False
+                return RepairResult.PACK_INSUFFICIENT
             # 超时保护：防止未知弹窗导致死循环
             if timeout.reached():
-                logger.warning('repair_pack_use_confirm timeout, repair pack may be exhausted')
-                return False
+                logger.warning('repair_pack_use_confirm timeout, unknown popup or stuck state')
+                return RepairResult.TIMEOUT
 
             if self.appear_then_click(STORAGE_REPAIR_CONFIRM, offset=(20, 20)):
                 continue
@@ -259,7 +277,12 @@ class StorageHandler(GlobeOperation, ZoneManager):
             button (Button): Ship
 
         Returns:
-            bool: True if repaired successfully, False if repair pack insufficient.
+            RepairResult: Result of the repair attempt, propagated from repair_pack_use_confirm().
+                RepairResult.SUCCESS          — 舰船修复成功（或满血无需修复）。
+                RepairResult.PACK_INSUFFICIENT — 维修箱耗尽，游戏弹出"道具不足"弹窗，
+                                                 调用方应停止继续修理后续舰船。
+                RepairResult.TIMEOUT          — 超时或遇到未知弹窗，无法确认修复结果，
+                                                 调用方可选择跳过该艘继续尝试。
 
         Pages:
             in: STORAGE_FLEET_CHOOSE

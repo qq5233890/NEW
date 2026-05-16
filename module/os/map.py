@@ -30,7 +30,7 @@ from module.os_handler.assets import (
     AUTO_SEARCH_OS_MAP_OPTION_ON,
     AUTO_SEARCH_REWARD,
 )
-from module.os_handler.storage import StorageHandler
+from module.os_handler.storage import StorageHandler, RepairResult
 from module.os_handler.strategic import StrategicSearchHandler
 from module.statistics.opsi_runtime import (
     finish_meow_search_timer,
@@ -389,16 +389,26 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                 "use repair packs for repairs"
             )
             for index, repair in enumerate(check):
-                if repair:
-                    # repair_pack_use 返回 False 表示维修箱耗尽，停止继续修理
-                    success = self.repair_pack_use(hp_grids.buttons[index])
-                    if not success:
-                        logger.warning(
-                            f'Repair pack exhausted while repairing fleet {fleet_index}, '
-                            'stop repairing remaining ships'
-                        )
-                        self.hp_reset()
-                        return False
+                if not repair:
+                    continue
+                ship_hp = round(self.hp[index] * 100) if index < len(self.hp) else '?'
+                result = self.repair_pack_use(hp_grids.buttons[index])
+                if result == RepairResult.SUCCESS:
+                    logger.info(f'Ship #{index + 1} in fleet {fleet_index} repaired')
+                elif result == RepairResult.PACK_INSUFFICIENT:
+                    # 维修箱确认耗尽，后续舰船无法修理，立即停止
+                    logger.warning(
+                        f'Repair pack exhausted at ship #{index + 1} (HP {ship_hp}%) '
+                        f'in fleet {fleet_index}, stop repairing remaining ships'
+                    )
+                    self.hp_reset()
+                    return False
+                elif result == RepairResult.TIMEOUT:
+                    # 超时或未知错误，记录警告但继续尝试下一艘（可能只是临时卡顿）
+                    logger.warning(
+                        f'Repair timed out at ship #{index + 1} (HP {ship_hp}%) '
+                        f'in fleet {fleet_index}, skip this ship and continue'
+                    )
             logger.info(f"All ships in fleet {fleet_index} repaired")
             self.hp_reset()
             return True
@@ -446,10 +456,16 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
         success = False
         if self.storage_get_next_item("REPAIR_PACK"):
             for index in fleet_index:
-                if self.handle_storage_one_fleet_repair(
+                fleet_repaired = self.handle_storage_one_fleet_repair(
                     fleet_index=index, threshold=repair_pack_threshold
-                ):
+                )
+                if fleet_repaired:
                     success = True
+                elif fleet_repaired is False:
+                    # handle_storage_one_fleet_repair 返回 False 表示维修箱耗尽
+                    # 继续尝试其他舰队只会触发超时，直接退出循环
+                    logger.warning('Repair pack exhausted, stop repairing remaining fleets')
+                    break
                 if any(self.need_repair):
                     repair = True
             self.storage_repair_cancel()
