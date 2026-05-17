@@ -122,6 +122,9 @@ class MapEventHandler(EnemySearchingHandler):
             return 'guild_popup_cancel'
         if self.handle_ash_popup():
             return 'ash_popup'
+        # 处理指挥猫搜寻时退出海域的确认弹窗 (issue #100)
+        if self.handle_popup_confirm('DEPART_CONFIRM'):
+            return 'depart_confirm'
         if self.handle_urgent_commission(drop=drop):
             return 'urgent_commission'
         if self.handle_story_skip(drop=drop):
