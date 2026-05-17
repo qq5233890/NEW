@@ -27,8 +27,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan gitcode.net >> ~/.ssh/known_hosts 2>/dev/null
-          git remote add mirror "git@gitcode.net:${GITCODE_USER}/${REPO}.git" 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
+          git remote remove mirror 2>/dev/null || true
+          git remote add mirror "git@gitcode.net:${GITCODE_USER}/${REPO}.git"
           git push --force mirror "${GITHUB_REF_NAME}:${GITHUB_REF_NAME}" 2>&1 | sed 's/./*/g'
         env:
           SSH_KEY: ${{ secrets.GITCODE_PRIVATE_KEY }}
