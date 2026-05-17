@@ -22,13 +22,16 @@ jobs:
           echo "::add-mask::${{ github.event.repository.name }}"
 
       - name: sync
-        uses: Yikun/hub-mirror-action@master
         if: env.gitcode_key && env.gitcode_token && env.gitcode_user
-        with:
-          src: 'github/${{ github.repository_owner }}'
-          dst: 'gitcode/${{ secrets.GITCODE_USER }}'
-          dst_key: ${{ secrets.GITCODE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITCODE_TOKEN }}
-          account_type: user
-          static_list: ${{ github.event.repository.name }}
-          force_update: true
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10"
+          git remote remove upstream-mirror 2>/dev/null || true
+          git remote add upstream-mirror "git@gitcode.com:${GITCODE_USER}/${REPO}.git"
+          git push --force upstream-mirror "HEAD:${GITHUB_REF_NAME}" 2>&1 | sed 's/./*/g'
+        env:
+          SSH_KEY: ${{ secrets.GITCODE_PRIVATE_KEY }}
+          GITCODE_USER: ${{ secrets.GITCODE_USER }}
+          REPO: ${{ github.event.repository.name }}
