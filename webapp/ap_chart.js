@@ -201,32 +201,26 @@
         }
         
         // ---- 虚拟资产独立范围（用于左侧刻度） ----
-        var virtualAssetMin = Infinity, virtualAssetMax = -Infinity;
+        var virtualAssetMin = 0, virtualAssetMax = -Infinity;
         if (hasVirtualAssetSeries) {
             for (var i = 0; i < lineVirtualAsset.length; i++) {
                 if (lineVirtualAsset[i] === null || lineVirtualAsset[i] === undefined) continue;
-                if (lineVirtualAsset[i] < virtualAssetMin) virtualAssetMin = lineVirtualAsset[i];
                 if (lineVirtualAsset[i] > virtualAssetMax) virtualAssetMax = lineVirtualAsset[i];
             }
-            if (virtualAssetMin === Infinity) virtualAssetMin = 0;
             if (virtualAssetMax === -Infinity) virtualAssetMax = 1000;
             var virtualAssetRng = virtualAssetMax - virtualAssetMin || 1;
-            virtualAssetMin -= virtualAssetRng * 0.08;
             virtualAssetMax += virtualAssetRng * 0.08;
         }
         
         // ---- 资产独立范围（用于左侧刻度） ----
-        var assetMin = Infinity, assetMax = -Infinity;
+        var assetMin = 0, assetMax = -Infinity;
         if (hasAssetSeries) {
             for (var i = 0; i < lineAsset.length; i++) {
                 if (lineAsset[i] === null || lineAsset[i] === undefined) continue;
-                if (lineAsset[i] < assetMin) assetMin = lineAsset[i];
                 if (lineAsset[i] > assetMax) assetMax = lineAsset[i];
             }
-            if (assetMin === Infinity) assetMin = 0;
             if (assetMax === -Infinity) assetMax = 1000;
             var assetRng = assetMax - assetMin || 1;
-            assetMin -= assetRng * 0.08;
             assetMax += assetRng * 0.08;
         }
 
