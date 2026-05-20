@@ -1252,10 +1252,10 @@ class Cl1Database:
             self.add_meow_battle_time, instance, duration, hazard_level
         )
 
-    def async_get_meow_stats(self, instance: str, year: int = None, month: int = None):
+    def async_get_meow_stats(self, instance: str, year: int = None, month: int = None, hazard_level: int = None):
         from module.base.async_executor import async_executor
 
-        return async_executor.submit(self.get_meow_stats, instance, year, month)
+        return async_executor.submit(self.get_meow_stats, instance, year, month, hazard_level)
 
     def async_add_siren_research_device(
         self, instance: str, source: str = "cl1", hazard_level: int = None
