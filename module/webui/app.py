@@ -3641,6 +3641,24 @@ class AlasGUI(Frame):
             )
             toast("已发送公告测试通知", color="info")
 
+        def _test_notify_error():
+            from module.notify import handle_notify
+
+            instance = _get_debug_target_instance()
+            if not instance:
+                toast("未找到可用实例，无法发送错误推送测试", color="warning")
+                return
+            config = load_config(instance)
+            success = handle_notify(
+                config.Error_OnePushConfig,
+                title=f"Alas <{instance}> 崩溃",
+                content=f"<{instance}> 开发者错误推送测试",
+            )
+            if success:
+                toast("已发送错误推送测试", color="success")
+            else:
+                toast("错误推送测试发送失败，请检查错误推送设置", color="error")
+
         put_buttons(
             buttons=[
                 {
@@ -3653,8 +3671,17 @@ class AlasGUI(Frame):
                     "value": "announcement",
                     "color": "info",
                 },
+                {
+                    "label": "测试错误推送",
+                    "value": "error",
+                    "color": "danger",
+                },
             ],
-            onclick=[_test_notify_update, _test_notify_announcement],
+            onclick=[
+                _test_notify_update,
+                _test_notify_announcement,
+                _test_notify_error,
+            ],
         )
 
     @use_scope("content", clear=True)
