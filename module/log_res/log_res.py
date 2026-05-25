@@ -39,6 +39,7 @@ class LogRes:
                     # 记录全量资源快照
                     self._record_all_resource_snapshot()
             elif isinstance(value, dict):
+                _mod = False
                 for value_name, _value in value.items():
                     if _value == original[value_name]:
                         continue
@@ -47,8 +48,10 @@ class LogRes:
                     _key_time = _key_group + f'.Record'
                     _time = datetime.now().replace(microsecond=0)
                     self.config.modified[_key_time] = _time
-                # 记录全量资源快照
-                self._record_all_resource_snapshot()
+                    _mod = True
+                if _mod:
+                    # 记录全量资源快照
+                    self._record_all_resource_snapshot()
         else:
             logger.info('No such resource on dashboard')
             super().__setattr__(name=key, value=value)
