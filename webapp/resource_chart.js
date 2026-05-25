@@ -65,15 +65,20 @@
     // Resource display configs
     var resourceMeta = [];
     var seriesVisible = [];
-    // 小量级资源走右轴，其余走左轴
+    // 轴分配：左轴（主刻度）、右轴（彩色刻度）、隐藏轴（独立范围，不显示刻度）
     var RIGHT_AXIS_KEYS = { ActionPoint: 1, YellowCoin: 1, PurpleCoin: 1 };
+    var HIDDEN_AXIS_KEYS = { Merit: 1 };
     for (var si = 0; si < seriesData.length; si++) {
+        var key = seriesData[si].key;
+        var side = 'left';
+        if (RIGHT_AXIS_KEYS[key]) side = 'right';
+        else if (HIDDEN_AXIS_KEYS[key]) side = 'hidden';
         resourceMeta.push({
-            key: seriesData[si].key,
+            key: key,
             name: seriesData[si].name,
             color: seriesData[si].color,
             data: seriesData[si].data,
-            side: RIGHT_AXIS_KEYS[seriesData[si].key] ? 'right' : 'left'
+            side: side
         });
         seriesVisible.push(true);
     }
@@ -88,27 +93,6 @@
             if (seriesVisible[i]) indices.push(i);
         }
         return indices;
-    }
-
-    function getAxisRange(visibleIndices, side) {
-        var minVal = Infinity, maxVal = -Infinity;
-        for (var vi = 0; vi < visibleIndices.length; vi++) {
-            var si = visibleIndices[vi];
-            if (resourceMeta[si].side !== side) continue;
-            var data = resourceMeta[si].data;
-            for (var i = 0; i < data.length; i++) {
-                if (data[i] === null || data[i] === undefined) continue;
-                if (data[i] < minVal) minVal = data[i];
-                if (data[i] > maxVal) maxVal = data[i];
-            }
-        }
-        if (minVal === Infinity) { minVal = 0; maxVal = 100; }
-        if (maxVal === minVal) { maxVal = minVal + 100; }
-        var range = maxVal - minVal;
-        minVal -= range * 0.08;
-        maxVal += range * 0.08;
-        minVal = Math.max(0, minVal);
-        return { min: minVal, max: maxVal };
     }
 
     function initChart() {
@@ -129,26 +113,16 @@
         gH = H - pad.t - pad.b;
 
         var visibleIndices = getVisibleDataIndices();
-        var rangeLeft = getAxisRange(visibleIndices, 'left');
 
-        function yOfLeft(v) {
-            return pad.t + gH - (v - rangeLeft.min) / (rangeLeft.max - rangeLeft.min) * gH;
-        }
-        function xOf(i) {
-            return pad.l + (i / Math.max(nn - 1, 1)) * gW;
-        }
-
-        // ---- Right axis: per-resource independent ranges ----
-        var rightAxisCfgs = [];
-        var yRightFns = {};
+        // ---- 所有资源独立 Y 轴范围 ----
+        var rightAxisCfgs = [];  // 右轴资源：用于彩色刻度
+        var yFns = {};           // 全部 12 项资源的 Y 函数
+        var gridMin = Infinity, gridMax = -Infinity;  // 网格/左轴参考范围
         (function () {
-            var seen = {};
             for (var vi = 0; vi < visibleIndices.length; vi++) {
                 var si = visibleIndices[vi];
                 var meta = resourceMeta[si];
-                if (meta.side !== 'right' || seen[meta.key]) continue;
-                seen[meta.key] = 1;
-                // 计算该资源的独立范围
+                if (yFns[meta.key]) continue;
                 var mn = Infinity, mx = -Infinity;
                 for (var di = 0; di < meta.data.length; di++) {
                     if (meta.data[di] === null || meta.data[di] === undefined) continue;
@@ -161,29 +135,40 @@
                 mn -= rng * 0.08;
                 mx += rng * 0.08;
                 mn = Math.max(0, mn);
-                var cfg = { key: meta.key, color: meta.color, range: { min: mn, max: mx }, offsetY: rightAxisCfgs.length * 12 };
-                rightAxisCfgs.push(cfg);
+                if (mn < gridMin) gridMin = mn;
+                if (mx > gridMax) gridMax = mx;
                 (function (rMin, rMax, rKey) {
-                    yRightFns[rKey] = function (v) {
+                    yFns[rKey] = function (v) {
                         return pad.t + gH - (v - rMin) / (rMax - rMin) * gH;
                     };
                 })(mn, mx, meta.key);
+                if (meta.side === 'right') {
+                    rightAxisCfgs.push({ key: meta.key, color: meta.color, range: { min: mn, max: mx }, offsetY: (rightAxisCfgs.length) * 12 });
+                }
             }
         })();
+        if (gridMin === Infinity) { gridMin = 0; gridMax = 100; }
+        var gridRng = gridMax - gridMin;
+        gridMin -= gridRng * 0.08;
+        gridMax += gridRng * 0.08;
+        gridMin = Math.max(0, gridMin);
 
+        function yOfGrid(v) {
+            return pad.t + gH - (v - gridMin) / (gridMax - gridMin) * gH;
+        }
         function yOfForMeta(meta, v) {
-            if (meta.side === 'right') {
-                var fn = yRightFns[meta.key];
-                return fn ? fn(v) : pad.t;
-            }
-            return yOfLeft(v);
+            var fn = yFns[meta.key];
+            return fn ? fn(v) : pad.t;
+        }
+        function xOf(i) {
+            return pad.l + (i / Math.max(nn - 1, 1)) * gW;
         }
 
         // ---- Draw background and grid ----
         ctx.fillStyle = "#1a1a2e";
         ctx.fillRect(0, 0, W, H);
 
-        // Primary axis (left) grid & ticks
+        // Grid lines + 左轴参考刻度
         ctx.strokeStyle = "#2a2a3e";
         ctx.lineWidth = 1;
         ctx.fillStyle = "#666";
@@ -191,20 +176,19 @@
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         for (var i = 0; i <= 5; i++) {
-            var v = rangeLeft.min + (rangeLeft.max - rangeLeft.min) * (i / 5);
-            var y = yOfLeft(v);
+            var v = gridMin + (gridMax - gridMin) * (i / 5);
+            var y = yOfGrid(v);
             ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
             ctx.fillText(fmtVal(v), pad.l - 8, y);
         }
-
-        // Secondary axes (right) colored ticks, one column per resource
+        // ---- Right axis colored ticks ----
         if (rightAxisCfgs.length > 0) {
             ctx.font = "10px -apple-system, sans-serif";
             ctx.textAlign = "left";
             ctx.textBaseline = "middle";
             for (var ti = 0; ti <= 5; ti++) {
-                var leftV = rangeLeft.min + (rangeLeft.max - rangeLeft.min) * (ti / 5);
-                var y = yOfLeft(leftV);
+                var leftV = gridMin + (gridMax - gridMin) * (ti / 5);
+                var y = yOfGrid(leftV);
                 for (var ri = 0; ri < rightAxisCfgs.length; ri++) {
                     var cfg = rightAxisCfgs[ri];
                     var rv = cfg.range.min + (cfg.range.max - cfg.range.min) * (ti / 5);
@@ -373,39 +357,15 @@
 
         var visibleIndices = getVisibleDataIndices();
 
-        // 左轴范围：所有 left 侧资源共用
-        function _calcLeftRange() {
-            var minVal = Infinity, maxVal = -Infinity;
-            for (var vi = 0; vi < visibleIndices.length; vi++) {
-                var si = visibleIndices[vi];
-                if (resourceMeta[si].side !== 'left') continue;
-                var data = resourceMeta[si].data;
-                for (var i = visibleStart; i < visibleEnd; i++) {
-                    if (data[i] === null || data[i] === undefined) continue;
-                    if (data[i] < minVal) minVal = data[i];
-                    if (data[i] > maxVal) maxVal = data[i];
-                }
-            }
-            if (minVal === Infinity) { minVal = 0; maxVal = 100; }
-            if (maxVal === minVal) { maxVal = minVal + 100; }
-            var rng = maxVal - minVal;
-            minVal -= rng * 0.08;
-            maxVal += rng * 0.08;
-            minVal = Math.max(0, minVal);
-            return { min: minVal, max: maxVal };
-        }
-        var rangeLeft = _calcLeftRange();
-
-        // 右轴：每个资源独立范围
+        // ---- 所有资源独立 Y 轴范围（缩放后） ----
         var rightAxisCfgs = [];
-        var yRightFns = {};
+        var yFns = {};
+        var gridMin = Infinity, gridMax = -Infinity;
         (function () {
-            var seen = {};
             for (var vi = 0; vi < visibleIndices.length; vi++) {
                 var si = visibleIndices[vi];
                 var meta = resourceMeta[si];
-                if (meta.side !== 'right' || seen[meta.key]) continue;
-                seen[meta.key] = 1;
+                if (yFns[meta.key]) continue;
                 var mn = Infinity, mx = -Infinity;
                 var data = meta.data;
                 for (var i = visibleStart; i < visibleEnd && i < data.length; i++) {
@@ -419,26 +379,31 @@
                 mn -= rng * 0.08;
                 mx += rng * 0.08;
                 mn = Math.max(0, mn);
-                var cfg = { key: meta.key, color: meta.color, range: { min: mn, max: mx }, offsetY: rightAxisCfgs.length * 12 };
-                rightAxisCfgs.push(cfg);
+                if (mn < gridMin) gridMin = mn;
+                if (mx > gridMax) gridMax = mx;
                 (function (rMin, rMax, rKey) {
-                    yRightFns[rKey] = function (v) {
+                    yFns[rKey] = function (v) {
                         return pad.t + gH - (v - rMin) / (rMax - rMin) * gH;
                     };
                 })(mn, mx, meta.key);
+                if (meta.side === 'right') {
+                    rightAxisCfgs.push({ key: meta.key, color: meta.color, range: { min: mn, max: mx }, offsetY: (rightAxisCfgs.length) * 12 });
+                }
             }
         })();
+        if (gridMin === Infinity) { gridMin = 0; gridMax = 100; }
+        var gridRng = gridMax - gridMin;
+        gridMin -= gridRng * 0.08;
+        gridMax += gridRng * 0.08;
+        gridMin = Math.max(0, gridMin);
 
         var ctx = cv.getContext("2d");
         ctx.scale(dpr, dpr);
 
-        function yOfLeft(v) { return pad.t + gH - (v - rangeLeft.min) / (rangeLeft.max - rangeLeft.min) * gH; }
+        function yOfGrid(v) { return pad.t + gH - (v - gridMin) / (gridMax - gridMin) * gH; }
         function yOfForMeta(meta, v) {
-            if (meta.side === 'right') {
-                var fn = yRightFns[meta.key];
-                return fn ? fn(v) : pad.t;
-            }
-            return yOfLeft(v);
+            var fn = yFns[meta.key];
+            return fn ? fn(v) : pad.t;
         }
         function xOf(i) { return pad.l + ((i - visibleStart) / Math.max(visibleNn - 1, 1)) * gW; }
 
@@ -446,7 +411,7 @@
         ctx.fillStyle = "#1a1a2e";
         ctx.fillRect(0, 0, W, H);
 
-        // Grid & left axis ticks
+        // Grid & left axis 参考刻度
         ctx.strokeStyle = "#2a2a3e";
         ctx.lineWidth = 1;
         ctx.fillStyle = "#666";
@@ -454,8 +419,8 @@
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         for (var i = 0; i <= 5; i++) {
-            var v = rangeLeft.min + (rangeLeft.max - rangeLeft.min) * (i / 5);
-            var y = yOfLeft(v);
+            var v = gridMin + (gridMax - gridMin) * (i / 5);
+            var y = yOfGrid(v);
             ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
             ctx.fillText(fmtVal(v), pad.l - 8, y);
         }
@@ -466,8 +431,8 @@
             ctx.textAlign = "left";
             ctx.textBaseline = "middle";
             for (var ti = 0; ti <= 5; ti++) {
-                var leftV = rangeLeft.min + (rangeLeft.max - rangeLeft.min) * (ti / 5);
-                var y = yOfLeft(leftV);
+                var leftV = gridMin + (gridMax - gridMin) * (ti / 5);
+                var y = yOfGrid(leftV);
                 for (var ri = 0; ri < rightAxisCfgs.length; ri++) {
                     var cfg = rightAxisCfgs[ri];
                     var rv = cfg.range.min + (cfg.range.max - cfg.range.min) * (ti / 5);
