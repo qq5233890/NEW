@@ -170,8 +170,9 @@
                 if (mn === Infinity) { mn = 0; mx = 100; }
                 if (mx === mn) { mx = mn + 100; }
                 var rng = mx - mn;
-                mn -= rng * 0.08;
-                mx += rng * 0.08;
+                var extra = Math.max(rng * 0.2, mn * 0.2, mx * 0.1);
+                mn -= extra;
+                mx += extra;
                 mn = Math.max(0, mn);
                 if (mn < gridMin) gridMin = mn;
                 if (mx > gridMax) gridMax = mx;
@@ -187,8 +188,9 @@
         })();
         if (gridMin === Infinity) { gridMin = 0; gridMax = 100; }
         var gridRng = gridMax - gridMin;
-        gridMin -= gridRng * 0.08;
-        gridMax += gridRng * 0.08;
+        var gridExtra = Math.max(gridRng * 0.1, gridMin * 0.08);
+        gridMin -= gridExtra;
+        gridMax += gridExtra;
         gridMin = Math.max(0, gridMin);
 
         function yOfGrid(v) {
@@ -420,8 +422,9 @@
                 if (mn === Infinity) { mn = 0; mx = 100; }
                 if (mx === mn) { mx = mn + 100; }
                 var rng = mx - mn;
-                mn -= rng * 0.08;
-                mx += rng * 0.08;
+                var extra = Math.max(rng * 0.2, mn * 0.2, mx * 0.1);
+                mn -= extra;
+                mx += extra;
                 mn = Math.max(0, mn);
                 if (mn < gridMin) gridMin = mn;
                 if (mx > gridMax) gridMax = mx;
@@ -437,8 +440,9 @@
         })();
         if (gridMin === Infinity) { gridMin = 0; gridMax = 100; }
         var gridRng = gridMax - gridMin;
-        gridMin -= gridRng * 0.08;
-        gridMax += gridRng * 0.08;
+        var gridExtra = Math.max(gridRng * 0.1, gridMin * 0.08);
+        gridMin -= gridExtra;
+        gridMax += gridExtra;
         gridMin = Math.max(0, gridMin);
 
         var ctx = cv.getContext("2d");
