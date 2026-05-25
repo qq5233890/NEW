@@ -346,6 +346,12 @@
       "True": "已启用",
       "False": "False"
     },
+    "PushNotification": {
+      "name": "推送通知",
+      "help": "启用后，任务完成时会通过 OnePush 推送成功或失败通知",
+      "True": "已启用",
+      "False": "关闭"
+    },
     "NextRun": {
       "name": "下一次运行时间",
       "help": "自动计算的数值，不需要手动修改。清空后将立即运行"
@@ -4154,7 +4160,6 @@
       "Actions": "操作"
     },
     "Update": {
-      "AutoUpdate": "自动更新",
       "UpToDate": "已是最新版本",
       "HaveUpdate": "有新版本可用",
       "UpdateStart": "开始更新",
