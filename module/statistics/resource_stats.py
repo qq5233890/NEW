@@ -4,15 +4,21 @@ import sqlite3
 import threading
 import os
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List
+
+from module.logger import logger
 
 
 _local_lock = threading.Lock()
 _LOCAL_DB = './config/azurstats_local.db'
+_table_ensured = False
 
 
 def _ensure_table():
-    """确保 resource_snapshots 表存在"""
+    """确保 resource_snapshots 表存在（仅首次调用时执行）"""
+    global _table_ensured
+    if _table_ensured:
+        return
     os.makedirs(os.path.dirname(_LOCAL_DB), exist_ok=True)
     with sqlite3.connect(_LOCAL_DB) as conn:
         conn.execute('''
@@ -37,6 +43,7 @@ def _ensure_table():
         conn.execute('CREATE INDEX IF NOT EXISTS idx_res_snap_instance ON resource_snapshots(instance)')
         conn.execute('CREATE INDEX IF NOT EXISTS idx_res_snap_ts ON resource_snapshots(instance, ts)')
         conn.commit()
+    _table_ensured = True
 
 
 def record_resource_snapshot(instance: str, resources: Dict[str, Any]) -> bool:
@@ -92,7 +99,6 @@ def record_resource_snapshot(instance: str, resources: Dict[str, Any]) -> bool:
                 conn.commit()
         return True
     except Exception as e:
-        from module.logger import logger
         logger.warning(f'Failed to record resource snapshot: {e}')
         return False
 
@@ -128,7 +134,6 @@ def get_resource_timeline(
             ).fetchall()
             return [dict(row) for row in rows]
     except Exception as e:
-        from module.logger import logger
         logger.warning(f'Failed to get resource timeline: {e}')
         return []
 
