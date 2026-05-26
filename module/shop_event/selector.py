@@ -68,6 +68,56 @@ def strip_filter_amount(filter_string):
     return ' > '.join(out)
 
 
+def parse_filter_tokens(filter_string):
+    """
+    Parse filter string into ordered tokens.
+
+    Returns:
+        list[dict]:
+            {'raw': str, 'name': str, 'amount': int|None, 'key': str|None}
+    """
+    out = []
+    for part in str(filter_string).split('>'):
+        raw = part.strip()
+        if not raw:
+            continue
+        token = {'raw': raw, 'name': raw, 'amount': None, 'key': None}
+        if ':' in raw:
+            name, amount = raw.rsplit(':', 1)
+            name = name.strip()
+            try:
+                amount = int(amount.strip())
+            except ValueError:
+                amount = None
+            else:
+                token['name'] = name
+                token['amount'] = amount
+                result = FILTER_REGEX.search(name.replace(' ', '').lower())
+                if result is not None:
+                    token['key'] = ''.join(value or '' for value in result.groups())
+        out.append(token)
+    return out
+
+
+def rebuild_filter_tokens(tokens):
+    """
+    Rebuild filter string from ordered tokens.
+    Tokens with amount <= 0 are removed.
+    """
+    parts = []
+    for token in tokens:
+        amount = token.get('amount')
+        name = token.get('name', '').strip()
+        if not name:
+            continue
+        if amount is None:
+            parts.append(name)
+            continue
+        if amount > 0:
+            parts.append(f'{name}:{amount}')
+    return ' > '.join(parts)
+
+
 EVENT_SHOP_PRESET_FILTER = {
     'all': """
         EquipUR > EquipSSR > Cube > GachaTicket
