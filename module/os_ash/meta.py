@@ -159,6 +159,11 @@ class OpsiAshBeacon(Meta):
                     # 正常结束
                     break
             if MetaState.ATTACKING == state:
+                # Exit beacon pages when in dossier-only mode
+                if self.config.OpsiAshBeacon_AttackMode == 'current_dossier_only' \
+                        and self.appear(BEACON_LIST, offset=(20, 20)):
+                    self.appear_then_click(ASH_QUIT, offset=(10, 10), interval=2)
+                    continue
                 if not self._pre_attack():
                     continue
                 if self._satisfy_attack_condition():
@@ -440,16 +445,20 @@ class OpsiAshBeacon(Meta):
         Returns:
             bool: 是否需要继续循环。
         """
+        
+        attack_mode = self.config.OpsiAshBeacon_AttackMode
         # META 主页面
         if self.appear(ASH_SHOWDOWN, offset=(30, 30), interval=2):
             # 信标入口
-            if self._check_beacon_point():
-                self.device.click(META_MAIN_BEACON_ENTRANCE)
-                logger.info('Select beacon entrance into')
-                return True
+            if attack_mode != 'current_dossier_only':
+                if self._check_beacon_point():
+                    self.device.click(META_MAIN_BEACON_ENTRANCE)
+                    logger.info('Select beacon entrance into')
+                    return True
             # 档案入口
+
             if _server_support() \
-                    and self.config.OpsiAshBeacon_AttackMode == 'current_dossier' \
+                    and attack_mode != 'current' \
                     and self._check_dossier_point():
                 if self.appear_then_click(META_MAIN_DOSSIER_ENTRANCE, offset=(20, 20), interval=2):
                     logger.info('Select dossier entrance into')
@@ -459,6 +468,9 @@ class OpsiAshBeacon(Meta):
             return False
         # 信标页面
         elif self.appear(BEACON_LIST, offset=(20, 20), interval=2):
+            if attack_mode == 'current_dossier_only':
+                self.appear_then_click(ASH_QUIT, offset=(10, 10), interval=2)
+                return True
             if self._check_beacon_point():
                 self.device.click(META_BEGIN_ENTRANCE)
                 logger.info('Begin a beacon')
@@ -466,7 +478,7 @@ class OpsiAshBeacon(Meta):
         # 档案页面
         elif _server_support() \
                 and self.appear(DOSSIER_LIST, offset=(20, 20), interval=2):
-            if self.config.OpsiAshBeacon_AttackMode == 'current_dossier' \
+            if attack_mode != 'current' \
                     and self._check_dossier_point():
                 if self.appear_then_click(META_BEGIN_ENTRANCE, offset=(20, 20), interval=2):
                     logger.info('Begin a dossier')
