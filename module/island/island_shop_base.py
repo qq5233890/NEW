@@ -318,6 +318,8 @@ class IslandShopBase(Island, WarehouseOCR):
 
         # 遍历槽位，找到第一个有缺口且可生产的就只处理它
         # 材料完全不可得的槽位本轮跳过，等后续模块补料后再试
+        if self._stalled:
+            logger.info(f"[stalled] 当前店铺({self.shop_type})的停滞列表: {self._stalled}")
         break_idx = len(self.post_products)
         for idx, (name, target) in enumerate(self.post_products):
             current = virtual_totals.get(name, 0)
@@ -812,8 +814,14 @@ class IslandShopBase(Island, WarehouseOCR):
 
         # 更新停滞标记：生产失败的记录下来，成功的清除
         remaining = set(self.to_post_products.keys())
-        self._stalled.update(to_post_before & remaining)
-        self._stalled.difference_update(to_post_before - remaining)
+        failed = to_post_before & remaining
+        cleared = to_post_before - remaining
+        if failed:
+            logger.info(f"[stalled] 标记游戏层失败: {failed}")
+        if cleared:
+            logger.info(f"[stalled] 清除标记: {cleared}")
+        self._stalled.update(failed)
+        self._stalled.difference_update(cleared)
 
         if self.to_post_products:
             logger.info(f"生产安排完成，剩余需求: {self.to_post_products}")
