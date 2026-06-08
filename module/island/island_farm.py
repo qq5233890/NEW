@@ -304,6 +304,10 @@ class IslandFarm(Island, WarehouseOCR, LoginHandler):
                     self.device.click(POST_ADD_ORDER)
                     self.device.sleep(0.5)
                     break
+                else:
+                    logger.warning(f"select_product 失败：未能找到产品 {product} 的选择项")
+                    self.device.click(POST_CLOSE)
+                    return False
         self.post_open(post_button)
         self.device.sleep(0.5)
         self.device.screenshot()
