@@ -8,6 +8,9 @@ from module.island.island_season import get_global_season_config
 
 
 class IslandShopBase(Island, WarehouseOCR):
+    # 游戏层材料不足的产品集，按店铺类型分 key，跨运行实例持久化
+    _stalled_by_shop = {}
+
     def __init__(self, config, device=None, task=None):
         # 分别初始化每个父类
         Island.__init__(self, config=config, device=device, task=task)
@@ -32,7 +35,6 @@ class IslandShopBase(Island, WarehouseOCR):
         self.warehouse_counts = {}  # 仓库识别到的产品
         self.to_post_products = {}
         self.current_totals = {}
-        self._stalled_products = set()  # 游戏层材料不足的产品，本轮跳过
 
         # 特殊材料（子类可覆盖）
         self.special_materials = {}
@@ -293,6 +295,13 @@ class IslandShopBase(Island, WarehouseOCR):
 
     # ============ 核心逻辑 ============
 
+    @property
+    def _stalled(self):
+        """获取当前店铺的游戏层材料不足产品集（跨实例持久化）。"""
+        if self.shop_type not in IslandShopBase._stalled_by_shop:
+            IslandShopBase._stalled_by_shop[self.shop_type] = set()
+        return IslandShopBase._stalled_by_shop[self.shop_type]
+
     def _compute_base_demands(self):
         """计算基础需求：严格按槽位顺序处理，找到第一个有缺口的槽位
         即停止，后续槽位本轮不处理。
@@ -314,7 +323,7 @@ class IslandShopBase(Island, WarehouseOCR):
             current = virtual_totals.get(name, 0)
             if current < target:
                 # 此前游戏中材料不足 → 本轮跳过，等后续模块补料
-                if name in self._stalled_products:
+                if name in self._stalled:
                     logger.info(f"槽位{idx + 1} {name} 此前游戏中材料不足，本轮跳过")
                     continue
                 deficit = target - current
@@ -803,8 +812,8 @@ class IslandShopBase(Island, WarehouseOCR):
 
         # 更新停滞标记：生产失败的记录下来，成功的清除
         remaining = set(self.to_post_products.keys())
-        self._stalled_products.update(to_post_before & remaining)
-        self._stalled_products.difference_update(to_post_before - remaining)
+        self._stalled.update(to_post_before & remaining)
+        self._stalled.difference_update(to_post_before - remaining)
 
         if self.to_post_products:
             logger.info(f"生产安排完成，剩余需求: {self.to_post_products}")
