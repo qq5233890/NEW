@@ -272,6 +272,13 @@ class Island(SelectCharacter):
             self.device.sleep(0.2)
 
         return False
+
+    def _handle_select_product_failure(self, product):
+        """select_product 失败时的统一处理：记录警告、关闭岗位面板、返回 False"""
+        logger.warning(f"select_product 失败：未能找到产品 {product} 的选择项")
+        self.device.click(POST_CLOSE)
+        return False
+
     def post_close(self):
         while 1:
             self.device.screenshot()
