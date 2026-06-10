@@ -309,7 +309,7 @@ class IslandShopBase(Island, WarehouseOCR):
             if produced_qty > 0:
                 produced_pass[name] = produced_pass.get(name, 0) + produced_qty
 
-    def _compute_base_demands(self, strict=False, force_skip=None):
+    def _compute_base_demands(self, check_materials=False, force_skip=None):
         """计算基础需求：严格按槽位顺序处理，找到第一个有缺口的槽位
         即停止，后续槽位本轮不处理。
 
@@ -318,13 +318,14 @@ class IslandShopBase(Island, WarehouseOCR):
         超额库存，可作为原料被后续槽位消费。
 
         Args:
-            strict: False（默认）需求计算阶段，原料为0不阻断套餐；
-                    True 排产无产出时使用，原料为0则跳过该缺口找下一个。
+            check_materials: False（默认）需求计算，原料为0不阻断，留给
+                             process_meal_requirements 分解。
+                             True 排产失败后使用，严格检查零库存来跳过缺口。
             force_skip: 强制跳过的产品名集合。排产多次失败（非原料原因如
                         角色被占）时使用，让本轮不再停留在这个缺口上。
         """
         # ============ 基础需求计算 ============
-        logger.info("阶段：基础需求" + ("（严格模式）" if strict else ""))
+        logger.info("阶段：基础需求" + ("（严格模式）" if check_materials else ""))
 
         self.to_post_products = {}
         virtual_totals = dict(self.current_totals)
@@ -339,9 +340,8 @@ class IslandShopBase(Island, WarehouseOCR):
                     logger.info(f"槽位{idx + 1} {name} 本轮已尝试失败，强制跳过")
                     continue
                 deficit = target - current
-                # 检查本轮能否至少生产一部分（>0 即材料部分可得）
-                # strict 模式时不跳过零库存原料，避免停在无法生产的缺口上
-                if self.get_max_producible(name, min(6, deficit), skip_zero_materials=not strict) <= 0:
+                # check_materials=True 时严格检查零库存，用于跳过无法生产的缺口
+                if self.get_max_producible(name, min(6, deficit), skip_zero_materials=not check_materials) <= 0:
                     logger.info(f"槽位{idx + 1} {name} 材料完全不足，本轮跳过")
                     continue
                 self.to_post_products[name] = deficit
@@ -447,7 +447,7 @@ class IslandShopBase(Island, WarehouseOCR):
                     self.current_totals = dict(_orig_totals)
                     for name, qty in _produced_pass.items():
                         self.current_totals[name] = self.current_totals.get(name, 0) + qty
-                    self._compute_base_demands(strict=True)
+                    self._compute_base_demands(check_materials=True)
                     if not self.to_post_products:
                         break
                     self.to_post_products = self.process_meal_requirements(self.to_post_products)

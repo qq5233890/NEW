@@ -396,7 +396,7 @@ class IslandTeahouse(IslandShopBase):
                     self.current_totals = dict(_orig_totals)
                     for name, qty in _produced_pass.items():
                         self.current_totals[name] = self.current_totals.get(name, 0) + qty
-                    self._compute_base_demands(strict=True)
+                    self._compute_base_demands(check_materials=True)
                     if not self.to_post_products:
                         break
                     self.to_post_products = self.process_meal_requirements(self.to_post_products)
