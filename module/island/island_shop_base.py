@@ -405,7 +405,6 @@ class IslandShopBase(Island, WarehouseOCR):
                 self.current_totals = dict(_orig_totals)
                 for name, qty in _produced_pass.items():
                     self.current_totals[name] = self.current_totals.get(name, 0) + qty
-                    logger.info(f"[循环] 已生产 {name} x{qty}，累计计入当前库存")
 
                 self._compute_base_demands()
                 if not self.to_post_products:
@@ -415,6 +414,7 @@ class IslandShopBase(Island, WarehouseOCR):
                 self.to_post_products = self.process_meal_requirements(self.to_post_products)
                 logger.info(f"基础需求生产计划: {self.to_post_products}")
 
+                prev_pass_total = sum(_produced_pass.values())
                 to_post_snapshot = dict(self.to_post_products)
                 self.schedule_production()
                 for name in to_post_snapshot:
@@ -422,6 +422,11 @@ class IslandShopBase(Island, WarehouseOCR):
                     produced = to_post_snapshot[name] - remaining
                     if produced > 0:
                         _produced_pass[name] = _produced_pass.get(name, 0) + produced
+
+                # 本轮无新增生产 → 再循环也不会改变结果，退出防止死循环
+                if sum(_produced_pass.values()) == prev_pass_total:
+                    logger.info("[循环] 本轮无新增生产，退出循环")
+                    break
 
             # ============ 检查是否还有空闲岗位，安排特殊餐品或常驻餐品 ============
             # 重新检查空闲岗位（因为可能部分岗位被基础需求占用）

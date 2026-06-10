@@ -387,6 +387,7 @@ class IslandTeahouse(IslandShopBase):
                 self.to_post_products = self.process_meal_requirements(self.to_post_products)
                 logger.info(f"基础需求生产计划: {self.to_post_products}")
 
+                prev_pass_total = sum(_produced_pass.values())
                 to_post_snapshot = dict(self.to_post_products)
                 self.schedule_production()
                 for name in to_post_snapshot:
@@ -394,6 +395,10 @@ class IslandTeahouse(IslandShopBase):
                     produced = to_post_snapshot[name] - remaining
                     if produced > 0:
                         _produced_pass[name] = _produced_pass.get(name, 0) + produced
+
+                if sum(_produced_pass.values()) == prev_pass_total:
+                    logger.info("[循环] 本轮无新增生产，退出循环")
+                    break
 
             # ============ 检查是否还有空闲岗位，安排特殊餐品或常驻餐品 ============
             idle_posts_after_basic = self.get_idle_posts()
