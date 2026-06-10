@@ -386,6 +386,9 @@ class IslandTeahouse(IslandShopBase):
                 if sum(_produced_pass.values()) == prev_pass_total and self.to_post_products:
                     logger.info("[循环] 当前缺口材料不足，切换严格模式扫描后续槽位")
                     self.to_post_products = {}
+                    self.current_totals = dict(_orig_totals)
+                    for name, qty in _produced_pass.items():
+                        self.current_totals[name] = self.current_totals.get(name, 0) + qty
                     self._compute_base_demands(strict=True)
                     if not self.to_post_products:
                         break

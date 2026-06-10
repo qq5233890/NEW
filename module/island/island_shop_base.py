@@ -431,6 +431,10 @@ class IslandShopBase(Island, WarehouseOCR):
                     # 切换严格模式跳过当前缺口，找后面能做的槽位
                     logger.info("[循环] 当前缺口材料不足，切换严格模式扫描后续槽位")
                     self.to_post_products = {}
+                    # 恢复 current_totals（上一轮 _compute 的保留线可能已修改它）
+                    self.current_totals = dict(_orig_totals)
+                    for name, qty in _produced_pass.items():
+                        self.current_totals[name] = self.current_totals.get(name, 0) + qty
                     self._compute_base_demands(strict=True)
                     if not self.to_post_products:
                         break
