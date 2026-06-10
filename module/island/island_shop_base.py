@@ -391,12 +391,13 @@ class IslandShopBase(Island, WarehouseOCR):
             if self.to_post_products:
                 to_post_snapshot = dict(self.to_post_products)
                 self.schedule_production()
-                # 记录排产成功的量（用于重建 current_totals）
+                # 记录排产成功的量（同步更新 warehouse_counts，让 get_max_producible 能看到）
                 for name in to_post_snapshot:
                     remaining = self.to_post_products.get(name, 0)
                     produced = to_post_snapshot[name] - remaining
                     if produced > 0:
                         _produced_pass[name] = _produced_pass.get(name, 0) + produced
+                        self.warehouse_counts[name] = self.warehouse_counts.get(name, 0) + produced
 
             # 循环：还有空岗就继续找下一个缺口
             while self.get_idle_posts():
@@ -422,6 +423,7 @@ class IslandShopBase(Island, WarehouseOCR):
                     produced = to_post_snapshot[name] - remaining
                     if produced > 0:
                         _produced_pass[name] = _produced_pass.get(name, 0) + produced
+                        self.warehouse_counts[name] = self.warehouse_counts.get(name, 0) + produced
 
                 # 本轮无新增生产 → 再循环也不会改变结果，退出防止死循环
                 if sum(_produced_pass.values()) == prev_pass_total:

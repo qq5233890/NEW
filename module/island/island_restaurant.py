@@ -356,6 +356,7 @@ class IslandRestaurant(IslandShopBase):
                     produced = to_post_snapshot[name] - remaining
                     if produced > 0:
                         _produced_pass[name] = _produced_pass.get(name, 0) + produced
+                        self.warehouse_counts[name] = self.warehouse_counts.get(name, 0) + produced
 
             while self.get_idle_posts():
                 self.current_totals = dict(_orig_totals)
@@ -378,6 +379,7 @@ class IslandRestaurant(IslandShopBase):
                     produced = to_post_snapshot[name] - remaining
                     if produced > 0:
                         _produced_pass[name] = _produced_pass.get(name, 0) + produced
+                        self.warehouse_counts[name] = self.warehouse_counts.get(name, 0) + produced
 
                 if sum(_produced_pass.values()) == prev_pass_total:
                     logger.info("[循环] 本轮无新增生产，退出循环")
