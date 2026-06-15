@@ -181,7 +181,8 @@ class MeowfficerBuy(MeowfficerBase):
         logger.info(f'Overflow buy count: {count} (overflow_count={overflow_count}, today_left={today_left})')
 
         # 执行购买
-        if self.meow_choose(count=count):
+        # 传入总共需要达到的数量（已买 + 还需买），meow_choose 会自动计算差额
+        if self.meow_choose(count=count + bought):
             self.meow_confirm()
         else:
             logger.info('Meowfficer overflow buy skipped by meow_choose')
