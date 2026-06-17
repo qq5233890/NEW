@@ -118,8 +118,9 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
             bool: 是否为满足条件的自定义商品
         """
         consume_coins = self.config.GeneralShop_ConsumeCoins
-        # 阈值验证：必须 > 0 且 <= 600000
-        if consume_coins > 0 and consume_coins <= 600000:
+        # 阈值验证：必须为 int、> 0 且 <= 600000
+        # 使用 type(x) is int 排除 bool 类型（Python 中 bool 是 int 的子类）
+        if type(consume_coins) is int and consume_coins > 0 and consume_coins <= 600000:
             if self._currency >= consume_coins:
                 if item.cost == 'Coins':
                     return True
@@ -144,8 +145,8 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
         """
         overflow_coins = self.config.GeneralShop_OverflowCoins
 
-        # 阈值检查：<= 0 表示功能关闭
-        if overflow_coins <= 0:
+        # 阈值检查：<= 0 表示功能关闭，非 int 类型（如旧数据中的 bool）视为无效
+        if type(overflow_coins) is not int or overflow_coins <= 0:
             return
 
         # 重新OCR识别金币（购买消耗物资后金币可能已变化）
@@ -174,22 +175,24 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
     def _validate_config_values(self):
         """验证并修正配置值。
 
-        检测 ConsumeCoins 和 OverflowCoins 的异常值（不在 0-600000 范围内），
-        并将异常值强制设置为零。
+        检测 ConsumeCoins 和 OverflowCoins 的异常值（不在 0-600000 范围内，
+        或类型非 int（如旧数据中的 bool）），并将异常值强制设置为零。
 
         有效范围：0 表示关闭功能，1-600000 表示启用功能并设置阈值。
+        必须为 int 类型：Python 中 bool 是 int 的子类，True > 0 恒为 True，
+        旧数据中的布尔值会导致消费溢出逻辑永远触发。
         """
         # 验证 ConsumeCoins
         consume_coins = self.config.GeneralShop_ConsumeCoins
-        if consume_coins < 0 or consume_coins > 600000:
-            logger.warning(f'ConsumeCoins={consume_coins}, invalid range (0-600000), '
+        if type(consume_coins) is not int or consume_coins < 0 or consume_coins > 600000:
+            logger.warning(f'ConsumeCoins={consume_coins}, invalid value (expected int in 0-600000), '
                            f'set to 0 to disable feature')
             self.config.GeneralShop_ConsumeCoins = 0
 
         # 验证 OverflowCoins
         overflow_coins = self.config.GeneralShop_OverflowCoins
-        if overflow_coins < 0 or overflow_coins > 600000:
-            logger.warning(f'OverflowCoins={overflow_coins}, invalid range (0-600000), '
+        if type(overflow_coins) is not int or overflow_coins < 0 or overflow_coins > 600000:
+            logger.warning(f'OverflowCoins={overflow_coins}, invalid value (expected int in 0-600000), '
                            f'set to 0 to disable feature')
             self.config.GeneralShop_OverflowCoins = 0
 
