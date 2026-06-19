@@ -234,7 +234,7 @@ class IslandFishery(Island, WarehouseOCR, LoginHandler):
         导航到渔具商店页签。
         渔具商店是渔场独有的左侧栏页签，入口在商店页面的左侧边栏（鱼苗图标按钮，y~467）。
         """
-        self.ui_goto(page_island_shop, get_ship=False)
+        self.ui_goto(page_island_shop, get_ship=False, offset=0)
         self.device.sleep(0.5)
         self.device.click(ISLAND_SHOP_GOTO_FISHERY_GEAR)
         while 1:
@@ -371,7 +371,7 @@ class IslandFishery(Island, WarehouseOCR, LoginHandler):
                 logger.info(f"\n需要购买的产品: {products_to_buy}")
 
                 # 前往鱼苗商店（不是种子商店），鱼苗商店有独立的页签
-                self.ui_goto(page_island_shop, get_ship=False)
+                self.ui_goto(page_island_shop, get_ship=False, offset=0)
                 self.device.sleep(0.5)
                 self.device.click(ISLAND_SHOP_GOTO_FISHERY_GEAR)
                 while 1:
