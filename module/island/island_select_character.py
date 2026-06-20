@@ -200,7 +200,6 @@ class SelectCharacter(UI):
             threshold=128,
             name='OCR_CHARACTER_STAMINA',
         )
-        ocr.SHOW_LOG = False
         current, _, total = ocr.ocr(screenshot)
         if total:
             return current
