@@ -140,6 +140,34 @@ RESTRICTED_DEVICE_IDS = {
 RESTRICTED_DEVICE_MESSAGE = (
     "你的公网IP已泄露 请加群https://qm.qq.com/q/7PTRnGrPzO联系我们解除安全限制"
 )
+PUBLIC_WEBUI_WITHOUT_PASSWORD_MESSAGE = "当前配置允许所有设备访问，请添加密码"
+
+
+def is_public_webui_host(host):
+    """
+    判断 WebUI 是否监听所有网络接口。
+
+    Args:
+        host (str): WebUI 监听地址。
+
+    Returns:
+        bool: True 表示 WebUI 允许所有设备访问。
+    """
+    host = str(host or "").strip().lower()
+    return host in ("0.0.0.0", "::", "[::]")
+
+
+def is_webui_password_set(password):
+    """
+    判断 WebUI 密码是否有效设置。
+
+    Args:
+        password: WebUI 密码配置。
+
+    Returns:
+        bool: True 表示密码包含非空白字符。
+    """
+    return bool(str(password or "").strip())
 
 
 def timedelta_to_text(delta=None):
@@ -5111,7 +5139,7 @@ def app():
     logger.hr("Webui configs")
     logger.attr("Theme", State.deploy_config.Theme)
     logger.attr("Language", lang.LANG)
-    logger.attr("Password", True if key else False)
+    logger.attr("Password", is_webui_password_set(key))
     logger.attr("CDN", cdn)
     logger.attr("IS_ON_PHONE_CLOUD", IS_ON_PHONE_CLOUD)
 
@@ -5132,8 +5160,22 @@ def app():
         )
         return True
 
+    def _block_public_webui_without_password():
+        host = State.webui_host or State.deploy_config.WebuiHost
+        if not is_public_webui_host(host) or is_webui_password_set(key):
+            return False
+        popup(
+            "安全保护",
+            PUBLIC_WEBUI_WITHOUT_PASSWORD_MESSAGE,
+            implicit_close=False,
+            closable=False,
+        )
+        return True
+
     def index():
         if _block_restricted_device():
+            return
+        if _block_public_webui_without_password():
             return
         if key is not None and not login(key):
             logger.warning(f"{info.user_ip} login failed.")
@@ -5146,6 +5188,8 @@ def app():
 
     def manage():
         if _block_restricted_device():
+            return
+        if _block_public_webui_without_password():
             return
         if key is not None and not login(key):
             logger.warning(f"{info.user_ip} login failed.")
