@@ -366,14 +366,36 @@ get_public_ip() {
 get_private_ip() {
     local ip
     if command -v hostname >/dev/null 2>&1; then
-        ip="$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | grep -v '^127\.' | paste -sd ',' -)"
+        ip="$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | grep -v '^127\.')"
         [ -n "${ip}" ] && printf '%s\n' "${ip}" && return
     fi
     if command -v ip >/dev/null 2>&1; then
-        ip="$(ip -4 -o addr show scope global | awk '{print $4}' | cut -d/ -f1 | paste -sd ',' -)"
+        ip="$(ip -4 -o addr show scope global | awk '{print $4}' | cut -d/ -f1)"
         [ -n "${ip}" ] && printf '%s\n' "${ip}" && return
     fi
     t ip_failed
+}
+
+print_urls() {
+    local label="$1"
+    local ips="$2"
+    local printed=0
+
+    while IFS= read -r ip; do
+        [ -z "${ip}" ] && continue
+        if [ "${printed}" -eq 0 ]; then
+            printf '%-12s: http://%s:%s\n' "${label}" "${ip}" "${WEBUI_PORT}"
+        else
+            printf '%-12s  http://%s:%s\n' "" "${ip}" "${WEBUI_PORT}"
+        fi
+        printed=1
+    done <<EOF
+${ips}
+EOF
+
+    if [ "${printed}" -eq 0 ]; then
+        printf '%-12s: %s\n' "${label}" "$(t ip_failed)"
+    fi
 }
 
 choose_language
@@ -437,5 +459,5 @@ PRIVATE_IP="$(get_private_ip)"
 printf '\n%b%s%b\n' "${BOLD}${GREEN}" "$(t done)" "${RESET}"
 printf '%-12s: %s\n' "$(t container)" "${CONTAINER}"
 printf '%-12s: %s\n' "$(t source_dir)" "${APP_DIR}"
-printf '%-12s: http://%s:%s\n' "$(t public_url)" "${PUBLIC_IP}" "${WEBUI_PORT}"
-printf '%-12s: http://%s:%s\n' "$(t private_url)" "${PRIVATE_IP}" "${WEBUI_PORT}"
+print_urls "$(t public_url)" "${PUBLIC_IP}"
+print_urls "$(t private_url)" "${PRIVATE_IP}"
