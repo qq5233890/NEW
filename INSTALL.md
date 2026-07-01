@@ -120,13 +120,25 @@ uv run python -m uiautomator2 init
 
 ## 三、启动与配置
 
-### 启动 WebUI
+### 启动 AzurPilot
+
+**方式一：一键启动（推荐）**
+
+Windows 双击 `run.bat`，或在命令行执行：
+
+```bash
+python launcher.py
+```
+
+启动器会自动打开 WebUI 并在浏览器中访问。
+
+**方式二：手动启动 WebUI**
 
 ```bash
 uv run python gui.py
 ```
 
-默认访问地址：`http://127.0.0.1:22267`
+然后在浏览器打开 `http://127.0.0.1:25548`。
 
 ### 首次配置（OOBE）
 

@@ -77,15 +77,13 @@ git clone https://github.com/wess09/AzurPilot.git
 cd AzurPilot
 uv sync --frozen
 
-# 3. 启动 WebUI
-uv run python gui.py
+# 3. 启动（一键启动器，自动打开浏览器）
+python launcher.py
 ```
 
+或者 Windows 双击 `run.bat`。
+
 依赖声明在 `pyproject.toml` 中，锁定结果提交在 `uv.lock`。不再维护 `requirements*.txt`。
-
-### Python 版本要求
-
-**Python >=3.14, <3.15**。依赖管理使用 `uv`，无需手动创建虚拟环境。
 
 ## 重要说明
 
