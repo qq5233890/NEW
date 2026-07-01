@@ -25,9 +25,11 @@ const config = {
         arch: ['x64'],
       },
     ],
+    sign: false,
   },
   portable: {
     artifactName: '${productName}_Portable_${version}.${ext}',
+    requestExecutionLevel: 'asInvoker',
   },
 };
 
