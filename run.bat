@@ -1,7 +1,13 @@
 @echo off
 cd /d "%~dp0"
-set "PATH=%~dp0.venv\Scripts;%~dp0.venv\Scripts\git\cmd;%PATH%"
-title AzurPilot
-start "" "%~dp0.venv\Scripts\pythonw.exe" "%~dp0gui.py"
-timeout /t 3 >nul
-start http://127.0.0.1:25548
+set "_pyBin=%~dp0.venv\Scripts"
+set "_GitBin=%~dp0.venv\Scripts\git\cmd"
+set "PATH=%_pyBin%;%_GitBin%;%PATH%"
+
+title AzurPilot Updater
+"%_pyBin%\python.exe" -m deploy.installer
+if %errorlevel% neq 0 (
+    pause >nul
+) else (
+    start "AzurPilot" "%_pyBin%\pythonw.exe" "%~dp0gui.py" --electron
+)
