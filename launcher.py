@@ -47,6 +47,8 @@ def main():
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
+        encoding='utf-8',
+        errors='replace',
     )
 
     def print_output():
